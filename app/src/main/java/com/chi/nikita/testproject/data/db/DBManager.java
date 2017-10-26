@@ -5,12 +5,14 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.os.Handler;
 import android.support.annotation.NonNull;
 
 import com.chi.nikita.testproject.data.model.UserModel;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 
 public class DBManager extends SQLiteOpenHelper {
@@ -19,8 +21,9 @@ public class DBManager extends SQLiteOpenHelper {
     private static DBManager ourInstance;
     private static final String DB_NAME = "TEST_DB";
     private static final int VERSION = 1;
-
     private static final String TABLE_USER = "USER_TABLE";
+    private Handler handler;
+    private Executor executor;
 
     /**
      * constants for TABLE_USER
@@ -54,16 +57,18 @@ public class DBManager extends SQLiteOpenHelper {
             PHONE + TYPE_INTEGER + UNIQUE +
             ")";
 
-    public DBManager(@NonNull final Context context) {
+    public DBManager(@NonNull final Context context, Handler handler) {
         super(context, DB_NAME, null, VERSION);
+        executor = Executors.newSingleThreadExecutor();
+        this.handler = handler;
     }
 
     public static DBManager getInstance() {
         return ourInstance;
     }
 
-    public static void initDatabase(@NonNull final Context context) {
-        ourInstance = new DBManager(context);
+    public static void initDatabase(@NonNull final Context context, Handler handler) {
+        ourInstance = new DBManager(context, handler);
     }
 
     public static boolean isInit() {
@@ -90,17 +95,8 @@ public class DBManager extends SQLiteOpenHelper {
         sqLiteDatabase = getWritableDatabase();
     }
 
-    /**
-     * Method for close Database
-     */
-    public void closeDB() {
-        if (sqLiteDatabase != null && sqLiteDatabase.isOpen()) {
-            sqLiteDatabase.close();
-        }
-    }
-
-    public void insertUser(@NonNull final UserModel userModel) {
-        Executors.newSingleThreadExecutor().execute(new Runnable() {
+    public void insertUserInDB(@NonNull final UserModel userModel) {
+        executor.execute(new Runnable() {
             @Override
             public void run() {
                 sqLiteDatabase.beginTransaction();
@@ -110,8 +106,7 @@ public class DBManager extends SQLiteOpenHelper {
                     cv.put(LAST_NAME, userModel.getLastName());
                     cv.put(PHONE, userModel.getPhone());
 
-                    long id = sqLiteDatabase.insert(TABLE_USER, null, cv);
-                    userModel.setId((int) id);
+                    sqLiteDatabase.insert(TABLE_USER, null, cv);
                     sqLiteDatabase.setTransactionSuccessful();
                 } finally {
                     sqLiteDatabase.endTransaction();
@@ -120,8 +115,8 @@ public class DBManager extends SQLiteOpenHelper {
         });
     }
 
-    public void updateUser(@NonNull final int id, @NonNull final UserModel userModel) {
-        Executors.newSingleThreadExecutor().execute(new Runnable() {
+    public void updateUserInDB(@NonNull final int id, @NonNull final UserModel userModel) {
+        executor.execute(new Runnable() {
             @Override
             public void run() {
                 sqLiteDatabase.beginTransaction();
@@ -141,16 +136,29 @@ public class DBManager extends SQLiteOpenHelper {
         });
     }
 
-    public long deleteUser(@NonNull final int id) {
+    public long deleteUserInDB(@NonNull final int id) {
         final String where = ID + " = " + id;
 
         return sqLiteDatabase.delete(TABLE_USER, where, null);
     }
 
-    public List<UserModel> getAllUsers() {
-        final String select = "SELECT * FROM " + TABLE_USER;
-        Cursor cursor = sqLiteDatabase.rawQuery(select, null);
-        return getUserModelList(cursor);
+    public void getAllUsersFromDB(final ResultListener resultListener) {
+        executor.execute(new Runnable() {
+            @Override
+            public void run() {
+                final String select = "SELECT * FROM " + TABLE_USER;
+                Cursor cursor = sqLiteDatabase.rawQuery(select, null);
+                final List<UserModel> userModelList = getUserModelList(cursor);
+
+
+                handler.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        resultListener.onSuccess(userModelList);
+                    }
+                });
+            }
+        });
     }
 
     private List<UserModel> getUserModelList(@NonNull final Cursor cursor) {
@@ -166,5 +174,10 @@ public class DBManager extends SQLiteOpenHelper {
         }
         cursor.close();
         return userModelList;
+
+    }
+
+    public interface ResultListener {
+        void onSuccess(List<UserModel> userModelList);
     }
 }

@@ -1,6 +1,10 @@
 package com.chi.nikita.testproject.ui.activity.main;
 
 import android.os.Bundle;
+import android.support.annotation.NonNull;
+import android.support.v7.app.AppCompatActivity;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -8,16 +12,15 @@ import android.widget.TextView;
 
 import com.chi.nikita.testproject.R;
 import com.chi.nikita.testproject.data.model.UserModel;
-import com.chi.nikita.testproject.ui.activity.BaseActivity;
 
-import java.util.List;
-
-public class MainActivity extends BaseActivity implements View.OnClickListener, MainView {
+public class MainActivity extends AppCompatActivity implements View.OnClickListener, MainView, TextWatcher {
 
     private EditText edtId, edtFirstName, edtLastName, edtPhone;
     private Button btnInsert, btnLoadAll, btnUpdate, btnDelete;
     private TextView tvData;
-    private MainPresenter presenter;
+    private MainPresenter<MainView> presenter;
+    private UserModel userModel;
+    private StringBuilder showUsers;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -25,14 +28,13 @@ public class MainActivity extends BaseActivity implements View.OnClickListener, 
         setContentView(R.layout.activity_main);
 
         presenter = new MainPresenterImpl();
-//        presenter.bindView(this);
+        presenter.bindView(this);
 
         init();
     }
 
     @Override
     public void onClick(View view) {
-        final UserModel userModel = new UserModel();
         switch (view.getId()) {
             case R.id.btnInsert:
                 userModel.setFirstName(getValue(edtFirstName));
@@ -50,20 +52,38 @@ public class MainActivity extends BaseActivity implements View.OnClickListener, 
                 presenter.deleteUser(Integer.parseInt(getValue(edtId)));
                 break;
             case R.id.btnLoadAll:
-                final List<UserModel> userModelList = presenter.getAllUsers();
-                final StringBuilder sb = new StringBuilder();
-                for(UserModel userModel1 : userModelList){
-                    sb.append(userModel1.getId());
-                    sb.append(" - ");
-                    sb.append(userModel1.getFirstName());
-                    sb.append(" - ");
-                    sb.append(userModel1.getLastName());
-                    sb.append(" - ");
-                    sb.append(userModel1.getPhone());
-                    sb.append("\n");
-                    tvData.setText(sb);
-                }
+                presenter.getAllUsers();
                 break;
+        }
+    }
+
+    @Override
+    public void onUserCRUD(@NonNull UserModel userModel) {
+        this.userModel = userModel;
+    }
+
+    @Override
+    public void onShowUsers(final StringBuilder showUsers) {
+        this.showUsers = showUsers;
+        tvData.setText(showUsers);
+    }
+
+    @Override
+    public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+    }
+
+    @Override
+    public void onTextChanged(CharSequence s, int start, int before, int count) {
+
+    }
+
+    @Override
+    public void afterTextChanged(Editable s) {
+        if (s.length() == 0) {
+            setButtonEnabled(false);
+        } else {
+            setButtonEnabled(true);
         }
     }
 
@@ -77,10 +97,14 @@ public class MainActivity extends BaseActivity implements View.OnClickListener, 
         edtLastName = (EditText) findViewById(R.id.edtLastName);
         edtPhone = (EditText) findViewById(R.id.edtPhone);
 
+        edtId.addTextChangedListener(this);
+
         btnInsert = (Button) findViewById(R.id.btnInsert);
         btnLoadAll = (Button) findViewById(R.id.btnLoadAll);
         btnUpdate = (Button) findViewById(R.id.btnUpdate);
         btnDelete = (Button) findViewById(R.id.btnDelete);
+
+        setButtonEnabled(false);
 
         btnInsert.setOnClickListener(this);
         btnUpdate.setOnClickListener(this);
@@ -88,5 +112,10 @@ public class MainActivity extends BaseActivity implements View.OnClickListener, 
         btnLoadAll.setOnClickListener(this);
 
         tvData = (TextView) findViewById(R.id.tvData);
+    }
+
+    private void setButtonEnabled(Boolean bool) {
+        btnUpdate.setEnabled(bool);
+        btnDelete.setEnabled(bool);
     }
 }

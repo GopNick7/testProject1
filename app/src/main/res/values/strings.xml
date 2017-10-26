@@ -6,6 +6,6 @@
     <string name="phone">Phone</string>
     <string name="insert">Insert</string>
     <string name="loadAll">LoadAll</string>
-    <string name="update">Update</string>
-    <string name="delete">Delete</string>
+    <string name="update">Update by id</string>
+    <string name="delete">Delete by id</string>
 </resources>
