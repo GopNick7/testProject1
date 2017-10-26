@@ -1,0 +1,11 @@
+<resources>
+    <string name="app_name">TestProject</string>
+    <string name="id">ID</string>
+    <string name="fName">First name</string>
+    <string name="lName">Last name</string>
+    <string name="phone">Phone</string>
+    <string name="insert">Insert</string>
+    <string name="loadAll">LoadAll</string>
+    <string name="update">Update</string>
+    <string name="delete">Delete</string>
+</resources>
