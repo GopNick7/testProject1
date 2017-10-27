@@ -20,7 +20,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private TextView tvData;
     private MainPresenter<MainView> presenter;
     private UserModel userModel;
-    private StringBuilder showUsers;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -58,28 +57,27 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     @Override
-    public void onUserCRUD(@NonNull UserModel userModel) {
+    public void onUserCRUD(@NonNull final UserModel userModel) {
         this.userModel = userModel;
     }
 
     @Override
-    public void onShowUsers(final StringBuilder showUsers) {
-        this.showUsers = showUsers;
+    public void onShowUsers(@NonNull final StringBuilder showUsers) {
         tvData.setText(showUsers);
     }
 
     @Override
-    public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+    public void beforeTextChanged(@NonNull final CharSequence s, int start, int count, int after) {
 
     }
 
     @Override
-    public void onTextChanged(CharSequence s, int start, int before, int count) {
+    public void onTextChanged(@NonNull final CharSequence s, int start, int before, int count) {
 
     }
 
     @Override
-    public void afterTextChanged(Editable s) {
+    public void afterTextChanged(@NonNull final Editable s) {
         if (s.length() == 0) {
             setButtonEnabled(false);
         } else {
@@ -87,7 +85,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }
     }
 
-    private String getValue(EditText edtText) {
+    private String getValue(@NonNull final EditText edtText) {
         return edtText.getText().toString().trim();
     }
 
@@ -114,7 +112,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         tvData = (TextView) findViewById(R.id.tvData);
     }
 
-    private void setButtonEnabled(Boolean bool) {
+    private void setButtonEnabled(@NonNull final Boolean bool) {
         btnUpdate.setEnabled(bool);
         btnDelete.setEnabled(bool);
     }

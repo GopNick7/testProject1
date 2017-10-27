@@ -12,10 +12,10 @@ public class MainPresenterImpl implements MainPresenter<MainView> {
 
     private MainView view;
     private UserModel userModel = new UserModel();
-    DBManager.ResultListener resultListener;
+    private DBManager.ResultListener resultListener;
 
     @Override
-    public void bindView(MainView view) {
+    public void bindView(@NonNull final MainView view) {
         this.view = view;
         view.onUserCRUD(userModel);
     }
@@ -31,17 +31,17 @@ public class MainPresenterImpl implements MainPresenter<MainView> {
     }
 
     @Override
-    public void insertUser(@NonNull UserModel userModel) {
+    public void insertUser(@NonNull final UserModel userModel) {
         DBManager.getInstance().insertUserInDB(userModel);
     }
 
     @Override
-    public void updateUser(@NonNull int id, @NonNull UserModel userModel) {
+    public void updateUser(int id, @NonNull final UserModel userModel) {
         DBManager.getInstance().updateUserInDB(id, userModel);
     }
 
     @Override
-    public void deleteUser(@NonNull int id) {
+    public void deleteUser(int id) {
         DBManager.getInstance().deleteUserInDB(id);
     }
 

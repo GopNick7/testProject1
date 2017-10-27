@@ -10,7 +10,7 @@ import com.facebook.stetho.Stetho;
 
 public class ApplicationTestProject extends Application {
 
-    Handler handler = new Handler(Looper.getMainLooper());
+    final Handler handler = new Handler(Looper.getMainLooper());
 
     @Override
     public void onCreate() {

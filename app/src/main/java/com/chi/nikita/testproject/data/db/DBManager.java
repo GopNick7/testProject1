@@ -57,7 +57,7 @@ public class DBManager extends SQLiteOpenHelper {
             PHONE + TYPE_INTEGER + UNIQUE +
             ")";
 
-    public DBManager(@NonNull final Context context, Handler handler) {
+    public DBManager(@NonNull final Context context, @NonNull final Handler handler) {
         super(context, DB_NAME, null, VERSION);
         executor = Executors.newSingleThreadExecutor();
         this.handler = handler;
@@ -67,7 +67,7 @@ public class DBManager extends SQLiteOpenHelper {
         return ourInstance;
     }
 
-    public static void initDatabase(@NonNull final Context context, Handler handler) {
+    public static void initDatabase(@NonNull final Context context, @NonNull final Handler handler) {
         ourInstance = new DBManager(context, handler);
     }
 
@@ -115,7 +115,7 @@ public class DBManager extends SQLiteOpenHelper {
         });
     }
 
-    public void updateUserInDB(@NonNull final int id, @NonNull final UserModel userModel) {
+    public void updateUserInDB(final int id, @NonNull final UserModel userModel) {
         executor.execute(new Runnable() {
             @Override
             public void run() {
@@ -136,7 +136,7 @@ public class DBManager extends SQLiteOpenHelper {
         });
     }
 
-    public long deleteUserInDB(@NonNull final int id) {
+    public long deleteUserInDB(final int id) {
         final String where = ID + " = " + id;
 
         return sqLiteDatabase.delete(TABLE_USER, where, null);
@@ -147,7 +147,7 @@ public class DBManager extends SQLiteOpenHelper {
             @Override
             public void run() {
                 final String select = "SELECT * FROM " + TABLE_USER;
-                Cursor cursor = sqLiteDatabase.rawQuery(select, null);
+                final Cursor cursor = sqLiteDatabase.rawQuery(select, null);
                 final List<UserModel> userModelList = getUserModelList(cursor);
 
 
